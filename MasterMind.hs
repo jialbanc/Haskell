@@ -185,18 +185,15 @@ crossover x s	= [a]++[b]++crossover x (s+10)
 
 
 --Obtiene una poblacon de s cuartetos hasta 0
-poblacion::Int->[[Int]]-> [[Int]]
-poblacion _ []	= []
-poblacion 0 x	= [a]
-				where
-					a=x !! 0
-poblacion s x	= [a]++poblacion (s-1) x
-				where
-					a=x !! (s-1)
-									
+poblacion::Int->Int->[[Int]]-> [[Int]]
+poblacion _ _ []	= []
+poblacion n s x		= [a]
+					where
+					i=unaleatorio n s
+					a=x !! (i-1)
 									
 --Escribe un archivo donde generamos la poblacion de 150 del algoritmo
-pob        =   do  	writeFile "poblacion.txt" (show (generaPoblacion 150 4 0 (1,6)))
+pob        =   do  	writeFile "poblacion.txt" (show (poblacion 150 56 cuartetos))
 
 --Genera individuos aleatorios
 aleatoriosI:: Int -> (Int,Int) -> [Int]
