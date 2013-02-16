@@ -5,13 +5,13 @@ import Data.Char (toLower)
 import Data.IORef
 
 --Carga las funciones de generacion y el juego
-empezarjuego = do wc; jugar
+empezarjuego = do wc; jugar;
 
 --Incia el juego
 jugar = do
  putStrLn $ "Mastermind\nEscribe salir para salir del juego\n"
              ++ "Puedes usar los siguientes codigos para representar los colores de las fichas:\n"
-			 ++ "Colores = Am | Az | Pl | Ne | Ca | Ve\n"
+			 ++ "Colores = 1 | 2 | 3 | 4 | 5 | 6 \n"
 		     ++ "Coloca cada codigo separado por espacios son 4 en total"
 
  cuarteto <- obtenercodigo
@@ -27,23 +27,24 @@ jugar = do
 
 --Obtiene un cuarteto aleatorio del archivo generado anteriormente
 obtenercodigo = do
-   cuartetoDB <- readFile "cuarteto.txt"
+   cuartetoDB <- readFile "cuartetos.txt"
    num <- randomRIO (0::Int, 1295) --
-   let cuarteto = ((read cuartetoDB::[[Colores]]) !! num) --Toma un cuarteto del archivo entre 0 y 1295 por que existen ese numero de casos posibles
+   let cuarteto = ((read cuartetoDB::[[Int]]) !! num) --Toma un cuarteto del archivo entre 0 y 1295 por que existen ese numero de casos posibles
+   writeFile "cuarteto.txt" (show cuarteto)
    return (cuarteto)
 
 --El lazo del juego que se repite un numero de veces establecidos al llamar a la funcion
 lazoprincipal cuarteto intentosposibles = do
    putStr "Ingresa Fichas "
    intento <- getLine --Se le pide ingresar fichas posibles
-   let tester = (map (map fst) . sequence $ map reads (words intento) :: [[Colores]]) --convierte la entrada en un data set definido, en este caso colores
-   let result = map read (words intento) :: [Colores]
+   let tester = (map (map fst) . sequence $ map reads (words intento) :: [[Int]]) --convierte la entrada en un data set definido, en este caso colores
+   let result = map read (words intento) :: [Int]
    if intento == "s" || intento == "salir" || intento == "e" || intento == "exit" || intentosposibles == 0
       then putStrLn $ "Ha terminado el juego.\nEl cuarteto que no adivinaste es el siguiente: " ++ (show cuarteto)
 
 
       else if intento == "recordarcolores"
-			then do putStrLn "Colores = Am | Az | Pl | Ne | Ca | Ve\n"
+			then do putStrLn "Colores = 1 | 2 | 3 | 4 | 5 | 6\n"
 				lazoprincipal cuarteto intentosposibles
 
        else if tester == []
@@ -71,35 +72,38 @@ read s           =  case [x | (x,t) <- reads s, ("","") <- lex t] of
 
 
 --Enumeracion de los colores.
-data Colores = Am | Az | Pl | Ne | Ca | Ve deriving (Eq, Ord, Show, Enum)
+--data Colores = Am | Az | Pl | Ne | Ca | Ve deriving (Eq, Ord, Show, Enum)
 
 --instancia para admitir entradas en minusculas y convertirlas a mayusculas.
-instance Read Colores where
-    readsPrec _ (c1:c2:rest) = case lookup (map toLower [c1,c2])
-        [("am",Am),("az",Az),("pl",Pl),("ne",Ne),("ca",Ca),("ve",Ve)]
-      of Just c -> [(c,rest)]
-         Nothing -> []
+--instance Read Colores where
+--    readsPrec _ (c1:c2:rest) = case lookup (map toLower [c1,c2])
+--        [("am",Am),("az",Az),("pl",Pl),("ne",Ne),("ca",Ca),("ve",Ve)]
+--      of Just c -> [(c,rest)]
+--         Nothing -> []
 
 --Funcion que realiza todas las combinaciones posibles.
 cuartetos = [ [a, b, c ,d] | a <- rs, b <- rs, c <- rs, d <- rs]
-  where rs = [Am, Az, Pl, Ne, Ca, Ve]
+  where rs = [1, 2, 3, 4, 5, 6]
 
+--Inicializando el cuarteto inicial
+cuarteto inicial =[1,1,2,3]
+  
 --Escribe un archivo para generar los cuartetos posibles y luego sacar uno al azar
-wc        =   do  writeFile "cuarteto.txt" (show cuartetos)
+wc        =   do  writeFile "cuartetos.txt" (show cuartetos)
                   putStrLn "The Codes has been written!"
 
---Muestra el numero de combinaciones posibles.
+				  --Muestra el numero de combinaciones posibles.
 movimientosposibles = putStrLn$ "Existen " ++ (show$ length cuartetos) ++ " movimientos posibles"
 
 --Funcion que encuentra las fichas en la posicion correcta
-negras :: [Colores] -> [Colores] -> [Colores]
+negras :: [Int] -> [Int] -> [Int]
 negras [] [] = []
 negras (x:xs) (y:ys)
 			|(x == y) = x : (negras xs ys)
 			|otherwise = negras xs ys
 
 --Funcion que encuentra las fichas que se encuentran en el cuarteto pero estan en la posicion equivocada
-w :: [Colores] -> [Colores] -> [Colores]
+w :: [Int] -> [Int] -> [Int]
 w x y = (blancas' (sort x) (sort y))
 blancas' [] _ = []
 blancas' _ [] = []
@@ -109,11 +113,11 @@ blancas' (x:xs) (y:ys)
   | (x > y) = blancas' ys (x:xs)
 
 --Calculo del tamaño de las fichas negras
-numnegras :: [Colores] -> [Colores] -> Int
+numnegras :: [Int] -> [Int] -> Int
 numnegras xs ys = length (negras xs ys)
 
 --Calculo del tamaño de las fichas blancas
-numblancas :: [Colores] -> [Colores] -> Int
+numblancas :: [Int] -> [Int] -> Int
 numblancas xs ys = length (w xs ys) - (numnegras xs ys)
 
 --Funcion para generar un solo numero aleatorio
@@ -121,27 +125,27 @@ unaleatorio::Int->Int->Int
 unaleatorio b s = (randomRs (1,b) (mkStdGen s)) !! (s `mod` b)
 
 --Funcion para sacar dos individuos de mi poblacion
-sacardos::[[Colores]] ->Int->Int ->([Colores],[Colores])
+sacardos::[[Int]] ->Int->Int ->([Int],[Int])
 sacardos x s r =(a,b)
 				where
 				a=x !! s
 				b=x !! r
 
 --Funcion de algoritmo genetico: Mutacion
-mutacion::[Colores] -> Colores -> Int -> [Colores]
+mutacion::[Int] -> Int -> Int -> [Int]
 mutacion [] _ _	= []
 mutacion x r i	= w++[r]++c
 				where
 				w=fst (splitAt (i-1) x)
 				c=tail (snd (splitAt (i-1) x))
 --Mutar Poblacion
---mutacionP::[[Colores]] ->Int ->Int->[[Colores]]
---mutacionP (x:xs) i s	=(mutacion x p i):xs
---						where
---						p=unaleatorio 0 (s+1)
+mutacionP::[[Int]] ->Int ->Int->[[Int]]
+mutacionP (x:xs) i s	=(mutacion x p i):xs
+						where
+						p=unaleatorio 0 (s+1)
 
 --Funcion de Cruzamiento en 1 punto
-cruzaUnPunto::[Colores]->[Colores]->Int ->([Colores],[Colores])
+cruzaUnPunto::[Int]->[Int]->Int ->([Int],[Int])
 cruzaUnPunto [] [] _ 	= ([],[])
 cruzaUnPunto [] [a] _ 	= ([],[])
 cruzaUnPunto [a] [] _	= ([],[])
@@ -152,7 +156,7 @@ cruzaUnPunto x y n		= (p,m)
 					d=splitAt n x
 					c=splitAt n y
 --Funcion de Cruzamiento 2 puntos
-cruzaDosPunto::[Colores]->[Colores]->Int->Int ->([Colores],[Colores])
+cruzaDosPunto::[Int]->[Int]->Int->Int ->([Int],[Int])
 cruzaDosPunto x y n l	=(p,m)
 						where
 						m=(fst f)++(snd c)
@@ -162,7 +166,7 @@ cruzaDosPunto x y n l	=(p,m)
 						f=cruzaUnPunto (fst c) (fst d) n
 						
 --Funcion de Cruzar dos individuos aleatorios de una poblacion
-cruzar::[[Colores]]->Int-> ([Colores],[Colores])
+cruzar::[[Int]]->Int-> ([Int],[Int])
 cruzar x s =((fst (cruzaUnPunto a b 10)),
 			(snd (cruzaUnPunto a b 10)))
 			where
@@ -172,7 +176,7 @@ cruzar x s =((fst (cruzaUnPunto a b 10)),
 			b= snd (sacardos x i j)
 			
 --Funcion de CrossOver de toda la poblacion
-crossover::[[Colores]]->Int-> [[Colores]]
+crossover::[[Int]]->Int-> [[Int]]
 crossover [] _	= []
 crossover x s	= [a]++[b]++crossover x (s+10)
 				where
@@ -181,7 +185,7 @@ crossover x s	= [a]++[b]++crossover x (s+10)
 
 
 --Obtiene una poblacon de s cuartetos hasta 0
-poblacion::Int->[[Colores]]-> [[Colores]]
+poblacion::Int->[[Int]]-> [[Int]]
 poblacion _ []	= []
 poblacion 0 x	= [a]
 				where
@@ -190,8 +194,9 @@ poblacion s x	= [a]++poblacion (s-1) x
 				where
 					a=x !! (s-1)
 									
+									
 --Escribe un archivo donde generamos la poblacion de 150 del algoritmo
-pob        =   do  	writeFile "poblacion.txt" (show (poblacion 150 cuartetos))
+pob        =   do  	writeFile "poblacion.txt" (show (generaPoblacion 150 4 0 (1,6)))
 
 --Genera individuos aleatorios
 aleatoriosI:: Int -> (Int,Int) -> [Int]
