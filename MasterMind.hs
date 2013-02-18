@@ -1,6 +1,6 @@
 import System.Random
 import Prelude hiding (read)
-import Data.List (sort)
+import Data.List
 import Data.Char (toLower)
 import Data.IORef
 
@@ -86,8 +86,9 @@ cuartetos = [ [a, b, c ,d] | a <- rs, b <- rs, c <- rs, d <- rs]
   where rs = [1, 2, 3, 4, 5, 6]
 
 --Inicializando el cuarteto inicial
-cuarteto inicial =[1,1,2,3]
-  
+cuartetoinicial = [1,1,2,3]
+randompoblacion = []
+poblacion = []
 --Escribe un archivo para generar los cuartetos posibles y luego sacar uno al azar
 wc        =   do  writeFile "cuartetos.txt" (show cuartetos)
                   putStrLn "The Codes has been written!"
@@ -183,29 +184,41 @@ crossover x s	= [a]++[b]++crossover x (s+10)
 				a=fst (cruzar x (s+3))
 				b=snd (cruzar x (s+2))
 
+			
+--Funcion que agrega un elemento a una lista enviada por parametro
+agregarE::Int->[Int]->[Int]
+agregarE n x	= insert n x
+
 
 --Obtiene una poblacon de s cuartetos hasta 0
-poblacion::Int->Int->[[Int]]-> [[Int]]
-poblacion _ _ []	= []
-poblacion n s x		= [a]
+poblacionI::Int->[[Int]]-> [[Int]]
+poblacionI _ []	= []
+poblacionI n x	= [a]
 					where
-					i=unaleatorio n s
-					a=x !! (i-1)
-									
---Escribe un archivo donde generamos la poblacion de 150 del algoritmo
-pob        =   do  	writeFile "poblacion.txt" (show (poblacion 150 56 cuartetos))
-
---Genera individuos aleatorios
-aleatoriosI:: Int -> (Int,Int) -> [Int]
-aleatoriosI s (a,b)	= randomRs (a, b) (mkStdGen s)
-
---Funcion que genera un solo individuo para la poblacion
-generaIndividuo:: Int -> Int ->(Int,Int)->[Int]
-generaIndividuo n l (a,b) = take n (aleatoriosI l (a,b))
-
---Genera la poblacion param: numero de cuartetos, cantidad de colores, semilla, rango de colores
---Devuelve la poblacion de cuartetos
-generaPoblacion:: Int ->Int->Int->(Int,Int)->[[Int]]
-generaPoblacion 0 _ _ (a,b) = []
-generaPoblacion n l p (a,b) = (generaIndividuo l (p-1) (a,b)): (generaPoblacion (n-1) (l) (p+10) (a,b))
-
+					a=x !! (n-1)
+					
+--Extraemos un codigo de la poblacion total sin que se repitan
+-- poblacioncodigo pob rand = do
+			
+			-- num <- randomRIO (0::Int, 1295)
+			
+			-- if (elem num rand) 
+				-- then
+					-- return (poblacionI num cuartetos)
+						
+						
+			-- else if (elem num rand)
+				-- then
+					-- return (insert num rand)
+				-- else
+					-- poblacioncodigo pob rand
+					
+				
+				-- poblacioncodigo pob rand
+				
+insertarE num = do
+			randomsDB <- readFile "listarandom.txt"
+			let randomlist=(read randomsDB::[Int])
+			let concatenacion=concat[randomlist,(agregarE num randompoblacion)]
+			writeFile "poblacion.txt" (show concatenacion)
+			
