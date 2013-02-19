@@ -86,12 +86,14 @@ cuartetos = [ [a, b, c ,d] | a <- rs, b <- rs, c <- rs, d <- rs]
   where rs = [1, 2, 3, 4, 5, 6]
 
 --Inicializando el cuarteto inicial
-cuartetoinicial = [1,1,2,3]
-randompoblacion = []
-poblacion = []
+
 --Escribe un archivo para generar los cuartetos posibles y luego sacar uno al azar
-wc        =   do  writeFile "cuartetos.txt" (show cuartetos)
-                  putStrLn "The Codes has been written!"
+wc        =   do  
+				let cuartetoinicial = [1,1,2,3]
+				let rpoblacion = [1296,1297]
+				let poblacion = []
+				writeFile "cuartetos.txt" (show cuartetos)
+				putStrLn "The Codes has been written!"
 
 				  --Muestra el numero de combinaciones posibles.
 movimientosposibles = putStrLn$ "Existen " ++ (show$ length cuartetos) ++ " movimientos posibles"
@@ -113,11 +115,13 @@ blancas' (x:xs) (y:ys)
   | (x < y) = blancas' xs (y:ys)
   | (x > y) = blancas' ys (x:xs)
 
---Calculo del tamaño de las fichas negras
+--Calculo del tamaño de las fichas negras 
+--param: code(cuarteto) -> guess(intentos)
 numnegras :: [Int] -> [Int] -> Int
 numnegras xs ys = length (negras xs ys)
 
---Calculo del tamaño de las fichas blancas
+--Calculo del tamaño de las fichas blancas 
+--param: code(cuarteto) -> guess(intentos)
 numblancas :: [Int] -> [Int] -> Int
 numblancas xs ys = length (w xs ys) - (numnegras xs ys)
 
@@ -187,7 +191,7 @@ crossover x s	= [a]++[b]++crossover x (s+10)
 			
 --Funcion que agrega un elemento a una lista enviada por parametro
 agregarE::Int->[Int]->[Int]
-agregarE n x	= insert n x
+agregarE n x = n:x
 
 
 --Obtiene una poblacon de s cuartetos hasta 0
@@ -216,9 +220,50 @@ poblacionI n x	= [a]
 				
 				-- poblacioncodigo pob rand
 				
-insertarE num = do
-			randomsDB <- readFile "listarandom.txt"
-			let randomlist=(read randomsDB::[Int])
-			let concatenacion=concat[randomlist,(agregarE num randompoblacion)]
-			writeFile "poblacion.txt" (show concatenacion)
+-- insertarE num = do
+			-- randomsDB <- readFile "listarandom.txt"
+			-- let randomlist=(read randomsDB::[Int])
+			-- let concatenacion=concat[randomlist,(agregarE num randompoblacion)]
+			-- writeFile "poblacion.txt" (show concatenacion)
+			
+			
+--
+-- insertar num lista = do
+			-- agregarE num lista
+			
+listaNueva lista numero = lista ++ [numero]
+
+--Calcula el fitness de un cuarteto(Si el numero de blancas i negras son iguales retorna true) 
+--param: code -> guess(perteneciente a la nueva poblacion)
+fitness::[Int]->[Int]-> Bool
+fitness [] [] = False
+fitness x y
+			|((numnegras x y)==(numblancas x y)) = True
+			| otherwise = False
+--Invierte dos posiciones random escogias y la secuencia de colores entre estas posiciones es invertida
+
+-- inversion::[Int]->[Int]
+-- inversion [] = []
+-- inversion x = a
+			-- where
+			-- i=randomRIO (0::Int, 3)
+			-- j=randomRIO (0::Int, 3)
+			-- a=x
+			-- aux=[1,1,1,1]
+			-- aux!!i=x!!j
+			-- a !! j=x !! i
+			-- a!!i=aux!!j
+--Genera una poblacion de cierta cantidad de cuartetos generados al random sin repetirse
+--param: listaPob -> en dond se guardara la poblacion
+--param: cant -> cantidad de cuartetos a generar
+generarPoblacion listaPob 0 = return []
+generarPoblacion listaPob cant = do
+		a <- randomRIO(0::Int, 1295)
+		
+		if(elem a listaPob) then do
+			generarPoblacion listaPob cant
+			return listaPob
+		else do
+			generarPoblacion (listaPob ++ [a]) (cant-1)
+
 			
