@@ -37,7 +37,7 @@ obtenercodigo = do
 lazoprincipal cuarteto intentosposibles = do
    putStr "Ingresa Fichas "
    intento <- getLine --Se le pide ingresar fichas posibles
-   let tester = (map (map fst) . sequence $ map reads (words intento) :: [[Int]]) --convierte la entrada en un data set definido, en este caso colores
+   let tester = (map (map fst) . sequence $ map reads (words intento) :: [[Int]]) --convierte la entrada en enteros
    let result = map read (words intento) :: [Int]
    if intento == "s" || intento == "salir" || intento == "e" || intento == "exit" || intentosposibles == 0
       then putStrLn $ "Ha terminado el juego.\nEl cuarteto que no adivinaste es el siguiente: " ++ (show cuarteto)
@@ -70,28 +70,15 @@ read s           =  case [x | (x,t) <- reads s, ("","") <- lex t] of
                          []  -> error "Entrada Erronea"
                          _   -> error "Error"
 
-
---Enumeracion de los colores.
---data Colores = Am | Az | Pl | Ne | Ca | Ve deriving (Eq, Ord, Show, Enum)
-
---instancia para admitir entradas en minusculas y convertirlas a mayusculas.
---instance Read Colores where
---    readsPrec _ (c1:c2:rest) = case lookup (map toLower [c1,c2])
---        [("am",Am),("az",Az),("pl",Pl),("ne",Ne),("ca",Ca),("ve",Ve)]
---      of Just c -> [(c,rest)]
---         Nothing -> []
-
 --Funcion que realiza todas las combinaciones posibles.
 cuartetos = [ [a, b, c ,d] | a <- rs, b <- rs, c <- rs, d <- rs]
   where rs = [1, 2, 3, 4, 5, 6]
 
 --Inicializando el cuarteto inicial
-
+cuartetoinicial = [1,1,2,3]
+rpoblacion=[]
 --Escribe un archivo para generar los cuartetos posibles y luego sacar uno al azar
 wc        =   do  
-				let cuartetoinicial = [1,1,2,3]
-				let rpoblacion = [1296,1297]
-				let poblacion = []
 				writeFile "cuartetos.txt" (show cuartetos)
 				putStrLn "The Codes has been written!"
 
@@ -135,7 +122,7 @@ sacardos x s r =(a,b)
 				where
 				a=x !! s
 				b=x !! r
-
+--Implementacion de funciones de algoritmos geneticos
 --Funcion de algoritmo genetico: Mutacion
 mutacion::[Int] -> Int -> Int -> [Int]
 mutacion [] _ _	= []
@@ -194,13 +181,6 @@ agregarE::Int->[Int]->[Int]
 agregarE n x = n:x
 					
 				
--- insertarE num = do
-			-- randomsDB <- readFile "listarandom.txt"
-			-- let randomlist=(read randomsDB::[Int])
-			-- let concatenacion=concat[randomlist,(agregarE num randompoblacion)]
-			-- writeFile "poblacion.txt" (show concatenacion)
-
-
 --Calcula el fitness de un cuarteto(Si el numero de blancas i negras son iguales retorna true) 
 --param: code -> guess(perteneciente a la nueva poblacion)
 fitness::[Int]->[Int]-> Bool
@@ -208,21 +188,21 @@ fitness [] [] = False
 fitness x y
 			|((numnegras x y)==(numblancas x y)) = True
 			| otherwise = False
-			
---Invierte dos posiciones random escogias y la secuencia de colores entre estas posiciones es invertida
 
--- inversion::[Int]->[Int]
--- inversion [] = []
--- inversion x = a
-			-- where
-			-- i=randomRIO (0::Int, 3)
-			-- j=randomRIO (0::Int, 3)
-			-- a=x
-			-- aux=[1,1,1,1]
-			-- aux!!i=x!!j
-			-- a !! j=x !! i
-			-- a!!i=aux!!j
-			
+--Obtiene el numero de elemento de mi poblacion total
+poblacion::Int->[[Integer]]-> [[Integer]]
+poblacion _ []	= []
+poblacion s x	= [a]
+				where
+					a=x !! s
+
+
+
+--Genera una version en reversa de la lista enviada por parametro	
+reversa:: [Int] -> [Int]
+reversa [] = []
+reversa (x:xs) = reversa (xs) ++ [x]
+
 --Genera una poblacion de cierta cantidad de cuartetos generados al random sin repetirse
 --param: listaPob -> en dond se guardara la poblacion
 --param: cant -> cantidad de cuartetos a generar
@@ -235,5 +215,11 @@ generarPoblacion listaPob cant = do
 			return listaPob
 		else do
 			generarPoblacion (listaPob ++ [a]) (cant-1)
-
-			
+--Inicializa mi poblacion de 150 cuartetos
+inicializarPoblacion lista = do
+		generarPoblacion lista 150
+		
+--Recorre la lista de randoms generados i extrae con esas posiciones los cuartetos deseados		
+extraer::[Int]->[[Integer]]->[[Integer]]
+extraer [] [] = []
+extraer (x:xs) s = (poblacion x s) ++ (extraer xs s)
