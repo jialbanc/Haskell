@@ -192,46 +192,14 @@ crossover x s	= [a]++[b]++crossover x (s+10)
 --Funcion que agrega un elemento a una lista enviada por parametro
 agregarE::Int->[Int]->[Int]
 agregarE n x = n:x
-
-
---Obtiene una poblacon de s cuartetos hasta 0
-poblacionI::Int->[[Int]]-> [[Int]]
-poblacionI _ []	= []
-poblacionI n x	= [a]
-					where
-					a=x !! (n-1)
 					
---Extraemos un codigo de la poblacion total sin que se repitan
--- poblacioncodigo pob rand = do
-			
-			-- num <- randomRIO (0::Int, 1295)
-			
-			-- if (elem num rand) 
-				-- then
-					-- return (poblacionI num cuartetos)
-						
-						
-			-- else if (elem num rand)
-				-- then
-					-- return (insert num rand)
-				-- else
-					-- poblacioncodigo pob rand
-					
-				
-				-- poblacioncodigo pob rand
 				
 -- insertarE num = do
 			-- randomsDB <- readFile "listarandom.txt"
 			-- let randomlist=(read randomsDB::[Int])
 			-- let concatenacion=concat[randomlist,(agregarE num randompoblacion)]
 			-- writeFile "poblacion.txt" (show concatenacion)
-			
-			
---
--- insertar num lista = do
-			-- agregarE num lista
-			
-listaNueva lista numero = lista ++ [numero]
+
 
 --Calcula el fitness de un cuarteto(Si el numero de blancas i negras son iguales retorna true) 
 --param: code -> guess(perteneciente a la nueva poblacion)
@@ -240,6 +208,7 @@ fitness [] [] = False
 fitness x y
 			|((numnegras x y)==(numblancas x y)) = True
 			| otherwise = False
+			
 --Invierte dos posiciones random escogias y la secuencia de colores entre estas posiciones es invertida
 
 -- inversion::[Int]->[Int]
@@ -253,6 +222,7 @@ fitness x y
 			-- aux!!i=x!!j
 			-- a !! j=x !! i
 			-- a!!i=aux!!j
+			
 --Genera una poblacion de cierta cantidad de cuartetos generados al random sin repetirse
 --param: listaPob -> en dond se guardara la poblacion
 --param: cant -> cantidad de cuartetos a generar
